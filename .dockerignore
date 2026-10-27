@@ -1,0 +1,6 @@
+*
+!pyproject.toml
+!uv.lock
+!isofate/
+isofate/gifs/
+**/__pycache__/

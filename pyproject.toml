@@ -18,6 +18,9 @@ dependencies = [
  "corner"
 ]
 
+[project.optional-dependencies]
+aws = ["boto3"]
+
 [tool.setuptools.packages.find]
 where = ["."] 
 include = ["isofate*"]

@@ -10,6 +10,9 @@ AWS_BATCH_JOB_ARRAY_INDEX. OUT.npz holds one row per planet: its index, its para
 sampled at the Atmodeller steps, with NaN rows for planets that failed. A shard keeps its rows in memory (about
 0.2 MB per planet) and writes them when it finishes, so size shards to a few thousand planets.
 
+OUT may be an s3:// URI (this needs boto3, the aws extra) and may contain {shard}, as in
+s3://bucket/outputs/run/shard-{shard:05d}.npz. A shard in which every planet fails still writes OUT, then exits 1.
+
 --pin (Linux) runs each worker on a CPU of its own, which cuts the time per planet by about 40%. Use it only when
 the job has its CPUs to itself: workers of jobs sharing a machine would pin to the same CPUs.
 '''
@@ -20,6 +23,8 @@ os.environ.setdefault('NPROC', '1') # XLA CPU thread pool size
 
 import argparse
 import multiprocessing as mp
+import sys
+import tempfile
 import time
 
 import numpy as np
@@ -95,6 +100,22 @@ def simulate(**planet):
     return {name: sol[key][SAMPLES]*scale for name, (key, scale) in SERIES.items()}
 
 
+def save(out, **arrays):
+    '''
+    Saves arrays as an .npz at a local path or an s3:// URI.
+    '''
+    if not out.startswith('s3://'):
+        np.savez(out, **arrays)
+        return
+    import boto3
+
+    bucket, _, key = out.removeprefix('s3://').partition('/')
+    with tempfile.TemporaryDirectory() as directory:
+        path = os.path.join(directory, 'out.npz')
+        np.savez(path, **arrays)
+        boto3.client('s3').upload_file(path, bucket, key)
+
+
 def _pin(cpus, counter):
     with counter.get_lock():
         os.sched_setaffinity(0, {cpus[counter.value % len(cpus)]})
@@ -149,10 +170,13 @@ def main():
         pool.close()
         pool.join()
 
-    np.savez(options.out, index = indices, ok = ~np.isnan(series['time'][:, 0]), Mp = planets['Mp'][indices],
-             P = planets['P'][indices], f_atm0 = planets['f_atm'][indices],
-             OtoH_enhancement = planets['OtoH_enhancement'][indices], **series)
-    print(f'saved {options.out}', flush = True)
+    out = options.out.format(shard = options.shard)
+    ok = ~np.isnan(series['time'][:, 0])
+    save(out, index = indices, ok = ok, Mp = planets['Mp'][indices], P = planets['P'][indices],
+         f_atm0 = planets['f_atm'][indices], OtoH_enhancement = planets['OtoH_enhancement'][indices], **series)
+    print(f'saved {out}: {ok.sum()}/{len(indices)} planets ok', flush = True)
+    if len(indices) and not ok.any():
+        sys.exit(1)
 
 
 if __name__ == '__main__':

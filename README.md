@@ -37,6 +37,8 @@ runs the M-dwarf XUV+RR population of Cherubim et al. 2025 and saves each planet
 - A planet takes about 0.3-0.5 s per CPU with ```--pin``` (one CPU per worker), and about twice that without it. Pin only when the job has its CPUs to itself.
 - Each process spends about 10 s compiling on its first planet, so give each one many planets. Pointing ```JAX_COMPILATION_CACHE_DIR``` at a directory that persists between runs saves the Atmodeller part of it.
 - ```benchmarks/bench_isocalc.py mc_timeseries``` times one planet of this population.
+- ```OUT``` may be an ```s3://``` URI (install the ```aws``` extra) and may contain ```{shard}```, such as ```s3://BUCKET/outputs/RUN/shard-{shard:05d}.npz```, so the children of an array job write to one folder.
+- The Dockerfile builds the image for AWS Batch on Fargate (```docker buildx build --platform linux/amd64```). jaxlib needs AVX, which Docker's x86 emulation on Apple Silicon lacks, so test locally with a native ```--platform linux/arm64``` build.
 
 ## Citation
 
