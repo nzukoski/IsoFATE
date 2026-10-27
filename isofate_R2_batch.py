@@ -80,7 +80,7 @@ def merge(paths):
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('out')
-    parser.add_argument('--planets-per-file', type=int, default=10_000)
+    parser.add_argument('--planets-per-file', type=int, default=2500)
     parser.add_argument('--first-file', type=int, default=0)
     parser.add_argument('--file', type=int, help='write this file instead of FIRST_FILE + AWS_BATCH_JOB_ARRAY_INDEX')
     parser.add_argument('--workers', type=int, default=r2.n_cpus())
