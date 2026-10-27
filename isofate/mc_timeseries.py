@@ -102,17 +102,17 @@ def simulate(**planet):
 
 def save(out, **arrays):
     '''
-    Saves arrays as an .npz at a local path or an s3:// URI.
+    Saves arrays as a compressed .npz (about half the size) at a local path or an s3:// URI.
     '''
     if not out.startswith('s3://'):
-        np.savez(out, **arrays)
+        np.savez_compressed(out, **arrays)
         return
     import boto3
 
     bucket, _, key = out.removeprefix('s3://').partition('/')
     with tempfile.TemporaryDirectory() as directory:
         path = os.path.join(directory, 'out.npz')
-        np.savez(path, **arrays)
+        np.savez_compressed(path, **arrays)
         boto3.client('s3').upload_file(path, bucket, key)
 
 

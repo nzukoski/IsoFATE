@@ -13,8 +13,9 @@ RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --no-dev --extra aws --no-install-project
 COPY pyproject.toml uv.lock ./
 COPY isofate isofate
+# uv reuses a cached isofate wheel until pyproject.toml changes, so rebuild it from the copied source
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --frozen --no-dev --extra aws --no-editable
+    uv sync --frozen --no-dev --extra aws --no-editable --reinstall-package isofate
 
 FROM python:3.13-slim-bookworm
 RUN useradd --create-home isofate
