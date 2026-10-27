@@ -2,5 +2,7 @@
 !pyproject.toml
 !uv.lock
 !isofate/
+!isofate_R2_run.py
+!isofate_R2_batch.py
 isofate/gifs/
 **/__pycache__/
