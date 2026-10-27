@@ -52,7 +52,7 @@ SERIES['O2_fugacity'] = ('fO2_a', 1)
 
 def draw_planets(n, seed):
     rng = np.random.default_rng(seed)
-    return {'P': 10**rng.uniform(np.log10(1), np.log10(300), n)/s2day, # orbital period [s]
+    return {'P': 10**rng.uniform(np.log10(0.2), np.log10(300), n)/s2day, # orbital period [s], 0.2 d ~ rocky Roche limit
             'Mp': 10**rng.uniform(np.log10(1), np.log10(20), n)*Me, # planet mass [kg]
             'f_atm': 10**rng.uniform(np.log10(0.001), np.log10(0.10), n), # atm mass fraction [ndim]
             'OtoH_enhancement': np.ones(n)} # O/H relative to protosolar
