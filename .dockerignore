@@ -4,5 +4,6 @@
 !isofate/
 !isofate_R2_run.py
 !isofate_R2_batch.py
+!isofate_mcmc_ref.py
 isofate/gifs/
 **/__pycache__/

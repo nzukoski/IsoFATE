@@ -3,6 +3,7 @@
 # IsoFATE for AWS Batch on Fargate. Build with --platform linux/amd64; jobs run, for example,
 #     python -m isofate.mc_timeseries s3://BUCKET/outputs/RUN/shard-{shard:05d}.npz --n-planets 100
 #     python /app/isofate_R2_batch.py s3://BUCKET/outputs/RUN --planets-per-file 2500 --first-file 0
+#     MCMC_S3_PREFIX=s3://BUCKET/outputs/RUN/ python /app/isofate_mcmc_ref.py --workers 16
 
 FROM ghcr.io/astral-sh/uv:python3.13-bookworm-slim AS build
 ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy UV_PYTHON_DOWNLOADS=0
@@ -21,7 +22,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 FROM python:3.13-slim-bookworm
 RUN useradd --create-home isofate
 COPY --from=build /app/.venv /app/.venv
-COPY isofate_R2_run.py isofate_R2_batch.py /app/
+COPY isofate_R2_run.py isofate_R2_batch.py isofate_mcmc_ref.py /app/
 ENV PATH=/app/.venv/bin:$PATH PYTHONUNBUFFERED=1
 USER isofate
 WORKDIR /home/isofate
